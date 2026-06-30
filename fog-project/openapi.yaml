@@ -1,0 +1,1332 @@
+openapi: 3.0.3
+info:
+  title: FOG Project API
+  description: |
+    REST API for the FOG Project open-source computer imaging and management system.
+
+    Generated from `packages/web/lib/router/route.class.php` (stable branch) and the
+    [Simplified API Documentation](https://news.fogproject.org/simplified-api-documentation/).
+
+    ## Authentication
+    Every request must include the global API token header. The per-user token header is
+    strongly recommended over HTTP Basic Auth.
+
+    | Header | Description |
+    |---|---|
+    | `fog-api-token` | Global API token (required) — found in FOG Settings → API Settings |
+    | `fog-user-token` | Per-user API token (recommended) — found in User Management → API Settings |
+
+    HTTP Basic Auth (`Authorization: Basic ...`) is also accepted but discouraged.
+
+    ## Base path
+    All routes are relative to `http://<your-fog-server>/fog`.
+  version: "1.5.x"
+  contact:
+    name: FOG Project
+    url: https://fogproject.org
+  license:
+    name: GPLv3
+    url: https://opensource.org/licenses/gpl-3.0
+
+servers:
+  - url: http://{fogserver}/fog
+    description: Your local FOG server
+    variables:
+      fogserver:
+        default: fogserver
+        description: Hostname or IP address of your FOG server
+
+security:
+  - ApiTokenHeader: []
+    UserTokenHeader: []
+
+components:
+  securitySchemes:
+    ApiTokenHeader:
+      type: apiKey
+      in: header
+      name: fog-api-token
+      description: Global FOG API token (base64-encoded internally)
+    UserTokenHeader:
+      type: apiKey
+      in: header
+      name: fog-user-token
+      description: Per-user FOG API token (base64-encoded internally)
+    BasicAuth:
+      type: http
+      scheme: basic
+
+  parameters:
+    objectClass:
+      name: object
+      in: path
+      required: true
+      description: |
+        One of the valid FOG object classes:
+        clientupdater, dircleaner, greenfog, group, groupassociation, history,
+        hookevent, host, hostautologout, hostscreensetting, image, imageassociation,
+        imagepartitiontype, imagetype, imaginglog, inventory, ipxe, keysequence,
+        macaddressassociation, module, moduleassociation, multicastsession,
+        multicastsessionassociation, nodefailure, notifyevent, os, oui, plugin,
+        powermanagement, printer, printerassociation, pxemenuoptions, scheduledtask,
+        service, snapin, snapinassociation, snapingroupassociation, snapinjob,
+        snapintask, storagegroup, storagenode, task, tasklog, taskstate, tasktype,
+        usercleanup, usertracking, virus
+      schema:
+        type: string
+        enum:
+          - clientupdater
+          - dircleaner
+          - greenfog
+          - group
+          - groupassociation
+          - history
+          - hookevent
+          - host
+          - hostautologout
+          - hostscreensetting
+          - image
+          - imageassociation
+          - imagepartitiontype
+          - imagetype
+          - imaginglog
+          - inventory
+          - ipxe
+          - keysequence
+          - macaddressassociation
+          - module
+          - moduleassociation
+          - multicastsession
+          - multicastsessionassociation
+          - nodefailure
+          - notifyevent
+          - os
+          - oui
+          - plugin
+          - powermanagement
+          - printer
+          - printerassociation
+          - pxemenuoptions
+          - scheduledtask
+          - service
+          - snapin
+          - snapinassociation
+          - snapingroupassociation
+          - snapinjob
+          - snapintask
+          - storagegroup
+          - storagenode
+          - task
+          - tasklog
+          - taskstate
+          - tasktype
+          - usercleanup
+          - usertracking
+          - virus
+
+    taskingClass:
+      name: object
+      in: path
+      required: true
+      description: |
+        One of the valid FOG tasking object classes:
+        group, host, multicastsession, scheduledtask, snapinjob, snapintask, task
+      schema:
+        type: string
+        enum:
+          - group
+          - host
+          - multicastsession
+          - scheduledtask
+          - snapinjob
+          - snapintask
+          - task
+
+    activeTaskClass:
+      name: object
+      in: path
+      required: true
+      description: |
+        One of the valid FOG active-task object classes:
+        multicastsession, scheduledtask, snapinjob, snapintask, task
+      schema:
+        type: string
+        enum:
+          - multicastsession
+          - scheduledtask
+          - snapinjob
+          - snapintask
+          - task
+
+    objectId:
+      name: id
+      in: path
+      required: true
+      description: Numeric ID of the object
+      schema:
+        type: integer
+
+    searchItem:
+      name: item
+      in: path
+      required: true
+      description: Search string
+      schema:
+        type: string
+
+  schemas:
+    # ---- Generic list response ------------------------------------------------
+    ListResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Total number of items returned
+        # The actual array key varies by object type (e.g. "hosts", "images")
+        # and cannot be statically named in OpenAPI; it is documented per-endpoint.
+      additionalProperties:
+        type: array
+        items:
+          type: object
+
+    # ---- System ---------------------------------------------------------------
+    SystemInfo:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+
+    # ---- Error ----------------------------------------------------------------
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Already created
+
+    # ---- Host -----------------------------------------------------------------
+    Host:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        ip:
+          type: string
+        imageID:
+          type: string
+        building:
+          type: string
+        createdTime:
+          type: string
+          format: date-time
+        deployed:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        useAD:
+          type: string
+        ADDomain:
+          type: string
+        ADOU:
+          type: string
+        ADUser:
+          type: string
+        ADPass:
+          type: string
+        productKey:
+          type: string
+        printerLevel:
+          type: string
+        kernelArgs:
+          type: string
+        kernel:
+          type: string
+        kernelDevice:
+          type: string
+        init:
+          type: string
+        pending:
+          type: string
+        pub_key:
+          type: string
+        sec_tok:
+          type: string
+        sec_time:
+          type: string
+        biosexit:
+          type: string
+        efiexit:
+          type: string
+        enforce:
+          type: string
+        primac:
+          type: string
+        macs:
+          type: array
+          items:
+            type: string
+        imagename:
+          type: string
+        pingstatus:
+          type: string
+        inventory:
+          $ref: '#/components/schemas/Inventory'
+        hostscreen:
+          type: object
+        hostalo:
+          type: object
+
+    HostCreate:
+      type: object
+      required:
+        - name
+        - macs
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        imageID:
+          type: integer
+        macs:
+          type: array
+          items:
+            type: string
+          description: First element becomes the primary MAC
+        snapins:
+          type: array
+          items:
+            type: integer
+          description: IDs of snapins to associate
+        printers:
+          type: array
+          items:
+            type: integer
+          description: IDs of printers to associate
+        modules:
+          type: array
+          items:
+            type: integer
+          description: IDs of modules to associate
+        groups:
+          type: array
+          items:
+            type: integer
+          description: IDs of groups to associate
+
+    HostEdit:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        imageID:
+          type: integer
+        macs:
+          type: array
+          items:
+            type: string
+        snapins:
+          type: array
+          items:
+            type: integer
+        printers:
+          type: array
+          items:
+            type: integer
+        modules:
+          type: array
+          items:
+            type: integer
+        groups:
+          type: array
+          items:
+            type: integer
+
+    # ---- Group ----------------------------------------------------------------
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        hostcount:
+          type: integer
+
+    GroupCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        hosts:
+          type: array
+          items:
+            type: integer
+        snapins:
+          type: array
+          items:
+            type: integer
+        printers:
+          type: array
+          items:
+            type: integer
+        modules:
+          type: array
+          items:
+            type: integer
+        imageID:
+          type: integer
+
+    # ---- Image ----------------------------------------------------------------
+    Image:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        path:
+          type: string
+        imageTypeID:
+          type: integer
+        imagePartitionTypeID:
+          type: integer
+        osID:
+          type: integer
+        size:
+          type: string
+        deployed:
+          type: string
+        os:
+          type: object
+        imagetype:
+          type: object
+        imagepartitiontype:
+          type: object
+        imagetypename:
+          type: string
+        imageparttypename:
+          type: string
+        osname:
+          type: string
+        storagegroupname:
+          type: string
+
+    # ---- Snapin ---------------------------------------------------------------
+    Snapin:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        file:
+          type: string
+        args:
+          type: string
+        path:
+          type: string
+        storagegroupname:
+          type: string
+
+    # ---- Task -----------------------------------------------------------------
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        createdTime:
+          type: string
+          format: date-time
+        stateID:
+          type: integer
+        typeID:
+          type: integer
+        hostID:
+          type: integer
+        host:
+          $ref: '#/components/schemas/Host'
+        image:
+          type: object
+        type:
+          type: object
+        state:
+          type: object
+        storagenode:
+          type: object
+        storagegroup:
+          type: object
+
+    TaskCreate:
+      type: object
+      required:
+        - taskTypeID
+      properties:
+        taskTypeID:
+          type: integer
+          description: |
+            ID of the task type to create. Common values:
+            1=Deploy, 2=Capture, 3=Multicast, 12=All Snapins, 13=Single Snapin
+        taskName:
+          type: string
+          description: Optional name for this task
+        shutdown:
+          type: boolean
+          default: false
+        debug:
+          type: boolean
+          default: false
+        deploySnapins:
+          description: |
+            false = no snapins, -1 = all snapins, integer = ID of a specific snapin
+          oneOf:
+            - type: boolean
+            - type: integer
+        passreset:
+          type: string
+          description: New password to set (for password-reset tasks)
+        sessionjoin:
+          type: string
+          description: Multicast session name to join
+        wol:
+          type: boolean
+          default: false
+          description: Wake-on-LAN before tasking
+
+    # ---- ScheduledTask --------------------------------------------------------
+    ScheduledTask:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        isActive:
+          type: integer
+        taskTypeID:
+          type: integer
+        hostID:
+          type: integer
+        groupID:
+          type: integer
+        runtime:
+          type: string
+        host:
+          $ref: '#/components/schemas/Host'
+        group:
+          $ref: '#/components/schemas/Group'
+        tasktype:
+          type: object
+
+    # ---- Inventory ------------------------------------------------------------
+    Inventory:
+      type: object
+      properties:
+        id:
+          type: integer
+        hostID:
+          type: integer
+        primaryUser:
+          type: string
+        cpus:
+          type: string
+        memory:
+          type: string
+        hdmodel:
+          type: string
+        hdsize:
+          type: string
+        biosversion:
+          type: string
+        manufacturer:
+          type: string
+        productname:
+          type: string
+        serialno:
+          type: string
+        asset:
+          type: string
+
+    # ---- StorageNode / StorageGroup ------------------------------------------
+    StorageNode:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        ip:
+          type: string
+        webroot:
+          type: string
+        maxClients:
+          type: integer
+        online:
+          type: boolean
+        clientload:
+          type: number
+        storagegroup:
+          $ref: '#/components/schemas/StorageGroup'
+
+    StorageGroup:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        totalsupportedclients:
+          type: integer
+        enablednodes:
+          type: array
+          items:
+            type: object
+        allnodes:
+          type: array
+          items:
+            type: object
+
+    # ---- SnapinJob / SnapinTask -----------------------------------------------
+    SnapinJob:
+      type: object
+      properties:
+        id:
+          type: integer
+        hostID:
+          type: integer
+        stateID:
+          type: integer
+        createdTime:
+          type: string
+          format: date-time
+        host:
+          $ref: '#/components/schemas/Host'
+        state:
+          type: object
+
+    SnapinTask:
+      type: object
+      properties:
+        id:
+          type: integer
+        jobID:
+          type: integer
+        snapinID:
+          type: integer
+        stateID:
+          type: integer
+        snapin:
+          type: object
+        snapinjob:
+          $ref: '#/components/schemas/SnapinJob'
+        state:
+          type: object
+
+    # ---- MulticastSession -----------------------------------------------------
+    MulticastSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        stateID:
+          type: integer
+        imageID:
+          type: integer
+        image:
+          type: object
+        state:
+          type: object
+
+# =============================================================================
+# Paths
+# =============================================================================
+paths:
+
+  # ---------------------------------------------------------------------------
+  # System
+  # ---------------------------------------------------------------------------
+  /system/info:
+    get:
+      tags:
+        - System
+      summary: Check API status
+      description: Returns HTTP 200 if the API is enabled and reachable.
+      operationId: getSystemInfo
+      responses:
+        '200':
+          description: API is up
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemInfo'
+        '403':
+          description: Invalid API token
+    head:
+      tags:
+        - System
+      summary: Check API status (HEAD)
+      description: Same as GET but returns headers only.
+      operationId: headSystemInfo
+      responses:
+        '200':
+          description: API is up
+        '403':
+          description: Invalid API token
+
+  /system/status:
+    get:
+      tags:
+        - System
+      summary: Check API status (alias)
+      operationId: getSystemStatus
+      responses:
+        '200':
+          description: API is up
+    head:
+      tags:
+        - System
+      summary: Check API status — HEAD alias
+      operationId: headSystemStatus
+      responses:
+        '200':
+          description: API is up
+
+  # ---------------------------------------------------------------------------
+  # Generic object routes
+  # ---------------------------------------------------------------------------
+  /{object}:
+    get:
+      tags:
+        - Objects
+      summary: List all objects of a given type
+      description: |
+        Returns all objects of the specified type. An optional JSON body can be
+        sent to filter results by any of the object's database fields.
+      operationId: listObjects
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+      requestBody:
+        description: Optional filter (JSON object with field/value pairs)
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              imageID: "3"
+      responses:
+        '200':
+          description: List of objects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — bad token
+
+  /{object}/list:
+    get:
+      tags:
+        - Objects
+      summary: List all objects (alias)
+      operationId: listObjectsAlias
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+      responses:
+        '200':
+          description: List of objects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+
+  /{object}/all:
+    get:
+      tags:
+        - Objects
+      summary: List all objects (alias)
+      operationId: listObjectsAll
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+      responses:
+        '200':
+          description: List of objects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+
+  /{object}/search/{item}:
+    get:
+      tags:
+        - Objects
+      summary: Search objects by name
+      description: Returns objects whose name matches the search string.
+      operationId: searchObjects
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+        - $ref: '#/components/parameters/searchItem'
+      responses:
+        '200':
+          description: Matching objects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+
+  /{object}/{id}:
+    get:
+      tags:
+        - Objects
+      summary: Get a single object by ID
+      operationId: getObject
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+        - $ref: '#/components/parameters/objectId'
+      responses:
+        '200':
+          description: The requested object
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Object not found
+
+    put:
+      tags:
+        - Objects
+      summary: Update an object (alias)
+      operationId: editObjectShort
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+        - $ref: '#/components/parameters/objectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated object
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Object not found
+        '500':
+          description: Save failed or name conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Objects
+      summary: Delete an object (alias)
+      operationId: deleteObjectShort
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+        - $ref: '#/components/parameters/objectId'
+      responses:
+        '200':
+          description: Object deleted
+        '404':
+          description: Object not found
+
+  /{object}/{id}/edit:
+    put:
+      tags:
+        - Objects
+      summary: Update / edit an object
+      description: |
+        Updates the object fields provided in the JSON body. Only fields present
+        in the body are changed; omitted fields keep their current values.
+
+        **Host-specific extra fields:**
+        - `macs` (array of strings) — replaces the full MAC list; first entry becomes primary
+        - `snapins`, `printers`, `modules`, `groups` (arrays of IDs) — diff-applied
+
+        **Group-specific extra fields:**
+        - `hosts`, `snapins`, `printers`, `modules` (arrays of IDs)
+        - `imageID` — assigns an image to all hosts in the group
+
+        **Image / Snapin extra fields:**
+        - `hosts` (array of IDs)
+        - `storagegroups` (array of IDs)
+      operationId: editObject
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+        - $ref: '#/components/parameters/objectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              changeImage:
+                summary: Change a host's image
+                value:
+                  imageID: "1"
+              addMacs:
+                summary: Set MACs on a host
+                value:
+                  macs:
+                    - "aa:bb:cc:dd:ee:ff"
+                    - "11:22:33:44:55:66"
+      responses:
+        '200':
+          description: Updated object (same schema as GET /{object}/{id})
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Object not found
+        '500':
+          description: Save failed or name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /{object}/{id}/update:
+    put:
+      tags:
+        - Objects
+      summary: Update an object (alias for /edit)
+      operationId: updateObject
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+        - $ref: '#/components/parameters/objectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated object
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Object not found
+
+  /{object}/create:
+    post:
+      tags:
+        - Objects
+      summary: Create a new object
+      description: |
+        Creates a new object. Required fields vary by object type.
+        See the `HostCreate` and `GroupCreate` schemas for the most-used types.
+      operationId: createObject
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              createHost:
+                summary: Create a host
+                value:
+                  name: "MyPC"
+                  macs:
+                    - "aa:bb:cc:dd:ee:ff"
+                  imageID: 2
+              createGroup:
+                summary: Create a group
+                value:
+                  name: "Lab A"
+                  description: "Computer lab A"
+      responses:
+        '200':
+          description: The newly created object
+          content:
+            application/json:
+              schema:
+                type: object
+        '417':
+          description: Required field missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Object already exists or save failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /{object}/new:
+    post:
+      tags:
+        - Objects
+      summary: Create a new object (alias)
+      operationId: createObjectNew
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: The newly created object
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /{object}/{id}/delete:
+    delete:
+      tags:
+        - Objects
+      summary: Delete an object
+      operationId: deleteObject
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+        - $ref: '#/components/parameters/objectId'
+      responses:
+        '200':
+          description: Object deleted
+        '404':
+          description: Object not found
+
+  /{object}/{id}/remove:
+    delete:
+      tags:
+        - Objects
+      summary: Delete an object (alias)
+      operationId: removeObject
+      parameters:
+        - $ref: '#/components/parameters/objectClass'
+        - $ref: '#/components/parameters/objectId'
+      responses:
+        '200':
+          description: Object deleted
+        '404':
+          description: Object not found
+
+  # ---------------------------------------------------------------------------
+  # Tasking
+  # ---------------------------------------------------------------------------
+  /{object}/{id}/task:
+    post:
+      tags:
+        - Tasking
+      summary: Create a task for a host or group
+      description: |
+        Creates an imaging or management task for the specified host or group.
+
+        **Valid task type IDs (common):**
+        | ID | Name |
+        |---|---|
+        | 1 | Deploy |
+        | 2 | Capture |
+        | 3 | Multicast |
+        | 4 | Debug |
+        | 12 | All-Snapins |
+        | 13 | Single Snapin |
+        | 14 | Download |
+        | 15 | Password Reset |
+        | 16 | Hardware Inventory |
+        | 17 | Image Replication |
+        | 18 | Snapin Replication |
+        | 19 | Wake-on-LAN |
+        | 20 | Fast Wipe |
+        | 21 | Normal Wipe |
+        | 22 | Full Wipe |
+        | 23 | Virus Scan |
+        | 24 | Virus Scan + Quarantine |
+      operationId: createTask
+      parameters:
+        - name: object
+          in: path
+          required: true
+          description: "host or group"
+          schema:
+            type: string
+            enum: [host, group, multicastsession, scheduledtask, snapinjob, snapintask, task]
+        - $ref: '#/components/parameters/objectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+            examples:
+              deployTask:
+                summary: Deploy image
+                value:
+                  taskTypeID: 1
+                  taskName: "Deploy Win11"
+                  shutdown: false
+                  wol: true
+              singleSnapin:
+                summary: Deploy a specific snapin
+                value:
+                  taskTypeID: 13
+                  deploySnapins: 6
+      responses:
+        '200':
+          description: Task created successfully
+        '404':
+          description: Host or group not found
+        '501':
+          description: Invalid task type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Task creation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ---------------------------------------------------------------------------
+  # Active / current tasks
+  # ---------------------------------------------------------------------------
+  /{object}/current:
+    get:
+      tags:
+        - Tasking
+      summary: List active / in-progress tasks
+      description: |
+        Returns tasks that are currently queued or in progress.
+        For `scheduledtask`, returns tasks where `isActive = 1`.
+        For all others, returns tasks in queued or running states.
+
+        An optional JSON body can filter results.
+      operationId: listActiveTasks
+      parameters:
+        - $ref: '#/components/parameters/activeTaskClass'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Active task list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+
+  /{object}/active:
+    get:
+      tags:
+        - Tasking
+      summary: List active tasks (alias for /current)
+      operationId: listActiveTasksAlias
+      parameters:
+        - $ref: '#/components/parameters/activeTaskClass'
+      responses:
+        '200':
+          description: Active task list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+
+  # ---------------------------------------------------------------------------
+  # Cancel tasks
+  # ---------------------------------------------------------------------------
+  /{object}/{id}/cancel:
+    delete:
+      tags:
+        - Tasking
+      summary: Cancel a specific task for a host or group
+      description: |
+        Cancels the active task(s) associated with the given object ID.
+        - For `host`: cancels the host's current task.
+        - For `group`: cancels tasks for all hosts in the group.
+        - For other task types: cancels matching queued/in-progress items.
+      operationId: cancelTask
+      parameters:
+        - $ref: '#/components/parameters/taskingClass'
+        - $ref: '#/components/parameters/objectId'
+      responses:
+        '200':
+          description: Task(s) cancelled
+        '404':
+          description: Object not found
+
+  /{object}/cancel:
+    delete:
+      tags:
+        - Tasking
+      summary: Cancel tasks matching a JSON body filter
+      description: |
+        Cancels active tasks that match the filter criteria supplied in the JSON body.
+      operationId: cancelTasksFiltered
+      parameters:
+        - $ref: '#/components/parameters/activeTaskClass'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Matching tasks cancelled
+
+  # ---------------------------------------------------------------------------
+  # Convenience: named object routes
+  # ---------------------------------------------------------------------------
+  /host:
+    get:
+      tags:
+        - Hosts
+      summary: List all hosts
+      operationId: listHosts
+      responses:
+        '200':
+          description: Host list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  hosts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Host'
+    post:
+      tags:
+        - Hosts
+      summary: Create a host (alias)
+      operationId: createHostAlias
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HostCreate'
+      responses:
+        '200':
+          description: Created host
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Host'
+
+  /host/{id}:
+    get:
+      tags:
+        - Hosts
+      summary: Get a single host
+      operationId: getHost
+      parameters:
+        - $ref: '#/components/parameters/objectId'
+      responses:
+        '200':
+          description: Host details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Host'
+        '404':
+          description: Host not found
+    put:
+      tags:
+        - Hosts
+      summary: Edit a host
+      operationId: editHost
+      parameters:
+        - $ref: '#/components/parameters/objectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HostEdit'
+      responses:
+        '200':
+          description: Updated host
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Host'
+        '404':
+          description: Host not found
+
+  /task/current:
+    get:
+      tags:
+        - Tasking
+      summary: List all active imaging tasks
+      description: Convenience alias — equivalent to GET /task/active.
+      operationId: listCurrentTasks
+      responses:
+        '200':
+          description: Active task list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  tasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+
+tags:
+  - name: System
+    description: Health-check and connectivity endpoints
+  - name: Objects
+    description: Generic CRUD routes that work for all valid object types
+  - name: Hosts
+    description: Convenience typed routes for host objects
+  - name: Tasking
+    description: Create, list, and cancel imaging/management tasks
